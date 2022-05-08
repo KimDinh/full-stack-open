@@ -1,0 +1,8 @@
+note over browser:
+when button is clicked, 
+browser adds the new note to the DOM,
+then sends the new note as JSON to server
+end note
+
+browser->server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+server-->browser: HTTP status code 201
