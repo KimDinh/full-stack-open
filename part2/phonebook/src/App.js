@@ -36,9 +36,17 @@ const App = () => {
     setNewFilter(event.target.value)
   }
 
+  const notify = (message, type) => {
+    setNotificationMsg({ [type]: message })
+    setTimeout(() => setNotificationMsg(null), 3000)
+  }
+
   const addPerson = (event) => {
     event.preventDefault()
     const newPerson = { name: newName, number: newNumber}
+
+    setNewName('')
+    setNewNumber('')
 
     if (newName === "" || newNumber === "") {
       setNotificationMsg({ error: "You must enter a name and a number" })
@@ -57,16 +65,11 @@ const App = () => {
           .update(updatedPerson.id, updatedPerson)
           .then(returnedPerson => {
             setPersons(persons.map(p => p.id === returnedPerson.id ? returnedPerson : p))
-            setNewName('')
-            setNewNumber('')
-            setNotificationMsg({ notification: `Updated number for ${returnedPerson.name}` })
-            setTimeout(() => setNotificationMsg(null), 3000)
+            notify(`Updated number for ${returnedPerson.name}`, "notification")
           })
           .catch((err) => {
-            setNewName('')
-            setNewNumber('')
-            setNotificationMsg({ error: `Information of ${newName} has already been removed from server` })
-            setTimeout(() => setNotificationMsg(null), 3000)
+            notify(`Information of ${newName} has already been removed from server`, "error")
+            setPersons(persons.filter(person => person.id !== oldPerson.id))
           })
       }
     } else {
@@ -74,14 +77,10 @@ const App = () => {
         .create(newPerson)
         .then(returnedPerson => {
           setPersons(persons.concat(returnedPerson))
-          setNewName('')
-          setNewNumber('')
-          setNotificationMsg({ notification: `Added ${returnedPerson.name}` })
-          setTimeout(() => setNotificationMsg(null), 3000)
+          notify(`Added ${returnedPerson.name}`, "notification")
         })
         .catch((err) => {
-          setNotificationMsg({ error: err.response.data })
-          setTimeout(() => setNotificationMsg(null), 3000)
+          notify(err.response.data, "error")
         })
     }
   }
@@ -97,8 +96,8 @@ const App = () => {
           setTimeout(() => setNotificationMsg(null), 3000)
         })
         .catch((err) => {
-          setNotificationMsg({ error: `Information of ${newName} has already been removed from server` })
-          setTimeout(() => setNotificationMsg(null), 3000)
+          notify(`Information of ${newName} has already been removed from server`, "error")
+          setPersons(persons.filter(person => person.id === id))
         })
     }
   }
