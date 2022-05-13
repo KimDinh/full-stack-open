@@ -48,11 +48,6 @@ const App = () => {
     setNewName('')
     setNewNumber('')
 
-    if (newName === "" || newNumber === "") {
-      setNotificationMsg({ error: "You must enter a name and a number" })
-      return
-    }
-
     const alreadyExisted = persons.some(person => person.name === newName)
     if (alreadyExisted) {
       const oldPerson = persons.find(person => person.name === newName)

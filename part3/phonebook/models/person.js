@@ -12,9 +12,28 @@ mongoose.connect(url)
     console.log('error connecting to MongoDB:', error.message)
   })
 
+const numberValidator = {
+  validator: (number) => {
+    if (number.includes('-')) {
+      return /^\d{2,3}-\d+/.test(number) && number.length >= 9
+    } else {
+      return /^\d{8,}/.test(number)
+    }
+  },
+  message: "Invalid number"
+}
+
 const personSchema = new mongoose.Schema({
-  name: String,
-  number: String
+  name: {
+    type: String,
+    minlength: 3,
+    required: true
+  },
+  number: {
+    type: String,
+    required: true,
+    validate: numberValidator
+  }
 })
 
 personSchema.set('toJSON', {
