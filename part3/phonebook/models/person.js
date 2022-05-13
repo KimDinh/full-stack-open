@@ -15,9 +15,9 @@ mongoose.connect(url)
 const numberValidator = {
   validator: (number) => {
     if (number.includes('-')) {
-      return /^\d{2,3}-\d+/.test(number) && number.length >= 9
+      return /^\d{2,3}-\d+$/.test(number) && number.length >= 9
     } else {
-      return /^\d{8,}/.test(number)
+      return /^\d{8,}$/.test(number)
     }
   },
   message: "Invalid number"

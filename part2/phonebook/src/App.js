@@ -62,10 +62,7 @@ const App = () => {
             setPersons(persons.map(p => p.id === returnedPerson.id ? returnedPerson : p))
             notify(`Updated number for ${returnedPerson.name}`, "notification")
           })
-          .catch((err) => {
-            notify(`Information of ${newName} has already been removed from server`, "error")
-            setPersons(persons.filter(person => person.id !== oldPerson.id))
-          })
+          .catch(err => notify(err.response.data.error, "error"))
       }
     } else {
       personService
@@ -74,9 +71,7 @@ const App = () => {
           setPersons(persons.concat(returnedPerson))
           notify(`Added ${returnedPerson.name}`, "notification")
         })
-        .catch((err) => {
-          notify(err.response.data, "error")
-        })
+        .catch(err => notify(err.response.data.error, "error"))
     }
   }
 
@@ -90,10 +85,7 @@ const App = () => {
           setNotificationMsg({ notification: `Deleted ${personToDel.name}` })
           setTimeout(() => setNotificationMsg(null), 3000)
         })
-        .catch((err) => {
-          notify(`Information of ${newName} has already been removed from server`, "error")
-          setPersons(persons.filter(person => person.id === id))
-        })
+        .catch(err => notify(err.response.data.error, "error"))
     }
   }
 
