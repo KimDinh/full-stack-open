@@ -9,18 +9,18 @@ app.use(express.static('build'))
 app.use(express.json())
 app.use(cors())
 
-morgan.token('post-body', (request, response) =>
-  request.method === 'POST' ? JSON.stringify(request.body) : ""  
+morgan.token('post-body', (request, ) =>
+  request.method === 'POST' ? JSON.stringify(request.body) : ''
 )
 app.use(
-  morgan(":method :url :status :res[content-length] - :response-time ms :post-body")
+  morgan(':method :url :status :res[content-length] - :response-time ms :post-body')
 )
 
-app.get("/api/persons", (request, response) => {
+app.get('/api/persons', (request, response) => {
   Person.find({}).then(persons => response.json(persons))
 })
 
-app.get("/info", (request, response) => {
+app.get('/info', (request, response) => {
   Person.find({}).then(persons => {
     response.send(`
       <p>Phonebook has info for ${persons.length} people</p>
@@ -29,7 +29,7 @@ app.get("/info", (request, response) => {
   })
 })
 
-app.get("/api/persons/:id", (request, response, next) => {
+app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
     .then(person => {
       if (person) {
@@ -41,16 +41,16 @@ app.get("/api/persons/:id", (request, response, next) => {
     .catch(error => next(error))
 })
 
-app.delete("/api/persons/:id", (request, response, next) => {
+app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndRemove(request.params.id)
-    .then(result => {
+    .then(() => {
       response.status(204).end()
     })
     .catch(error => next(error))
 })
 
-app.post("/api/persons", (request, response, next) => {
-  const person = new Person ({ 
+app.post('/api/persons', (request, response, next) => {
+  const person = new Person ({
     name: request.body.name,
     number: request.body.number
   })
@@ -61,7 +61,7 @@ app.post("/api/persons", (request, response, next) => {
     })
 })
 
-app.put("/api/persons/:id", (request, response, next) => {
+app.put('/api/persons/:id', (request, response, next) => {
   const person = {
     name: request.body.name,
     number: request.body.number
@@ -70,7 +70,7 @@ app.put("/api/persons/:id", (request, response, next) => {
   Person.findByIdAndUpdate(
     request.params.id,
     person,
-    { new: true, runValidators: true, context: 'query'})
+    { new: true, runValidators: true, context: 'query' })
     .then((updatedPerson) => {
       response.json(updatedPerson)
     })
@@ -98,5 +98,5 @@ app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`)
 })
