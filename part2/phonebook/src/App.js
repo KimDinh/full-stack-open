@@ -85,7 +85,10 @@ const App = () => {
           setNotificationMsg({ notification: `Deleted ${personToDel.name}` })
           setTimeout(() => setNotificationMsg(null), 3000)
         })
-        .catch(err => notify(err.response.data.error, "error"))
+        .catch(() => {
+          notify(`Information of ${personToDel.name} has already been removed from server`, "error")
+          setPersons(persons.filter(p => p.name !== personToDel.name))
+        })
     }
   }
 
