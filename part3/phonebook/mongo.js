@@ -5,9 +5,9 @@ if (process.argv.length < 3) {
   process.exit(1)
 }
 
-const password = process.argv[2]
+const password = encodeURIComponent(process.argv[2])
 
-const url = `mongodb+srv://hoangkim:${password}@cluster0.vcoqr.mongodb.net/phonebookApp?retryWrites=true&w=majority`
+const url = `mongodb+srv://hoangkim:${password}@cluster0.qpj55ji.mongodb.net/PhonebookApp?retryWrites=true&w=majority&appName=PhonebookApp`
 
 mongoose.connect(url)
 

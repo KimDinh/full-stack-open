@@ -12,17 +12,6 @@ mongoose.connect(url)
     console.log('error connecting to MongoDB:', error.message)
   })
 
-const numberValidator = {
-  validator: (number) => {
-    if (number.includes('-')) {
-      return /^\d{2,3}-\d+$/.test(number) && number.length >= 9
-    } else {
-      return /^\d{8,}$/.test(number)
-    }
-  },
-  message: 'Invalid number'
-}
-
 const personSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -31,8 +20,12 @@ const personSchema = new mongoose.Schema({
   },
   number: {
     type: String,
+    minlength: 8,
     required: true,
-    validate: numberValidator
+    validate: {
+      validator: (number) => /^\d{2,3}-\d+$/.test(number),
+      message: 'Phone number must be at least 8 characters and contain a hyphen after the second or third digit (e.g., 012-34567).'
+    }
   }
 })
 
