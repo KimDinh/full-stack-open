@@ -4,13 +4,29 @@ const mongoose = require('mongoose')
 const supertest = require('supertest')
 const helper = require('./test_helper')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 const app = require('../app')
 
 const api = supertest(app)
 
+const testUser = {
+  username: "abcde",
+  user: "User 1",
+  password: "abcde",
+}
+
+let token
+let userId
+
+before(async () => {
+  await User.deleteMany({})
+  userId = (await api.post('/api/users').send(testUser)).body.id
+  token = (await api.post('/api/login').send(testUser)).body.token
+})
+
 beforeEach(async () => {
   await Blog.deleteMany({})
-  await Blog.insertMany(helper.initialBlogs)
+  await Blog.insertMany(helper.initialBlogs.map(blog => ({ ...blog, user: userId })))
 })
 
 describe('when there are some initial blogs saved', () => {
@@ -38,7 +54,7 @@ describe('when there are some initial blogs saved', () => {
         .get(`/api/blogs/${blogToView.id}`)
         .expect(200)
         .expect('Content-Type', /application\/json/)
-      assert.deepStrictEqual(response.body, blogToView)
+      assert.deepStrictEqual(response.body, { ...blogToView, user: blogToView.user.toString() })
     })
 
     test('fails with status code 404 if id does not exist', async () => {
@@ -63,6 +79,7 @@ describe('when there are some initial blogs saved', () => {
     test('blog count increases by 1 and added blog title is found', async () => {
       await api
         .post("/api/blogs")
+        .set({ Authorization: `Bearer ${token}`})
         .send(newBlog)
         .expect(201)
         .expect("Content-Type", /application\/json/)
@@ -76,6 +93,7 @@ describe('when there are some initial blogs saved', () => {
       const { likes, ...blogNoLikes } = newBlog
       await api
         .post("/api/blogs")
+        .set({ Authorization: `Bearer ${token}`})
         .send(blogNoLikes)
         .expect(201)
         .expect("Content-Type", /application\/json/)
@@ -88,6 +106,7 @@ describe('when there are some initial blogs saved', () => {
       const { title, ...blogNoTitle } = newBlog
       await api
         .post("/api/blogs")
+        .set({ Authorization: `Bearer ${token}`})
         .send(blogNoTitle)
         .expect(400)
     })
@@ -96,8 +115,17 @@ describe('when there are some initial blogs saved', () => {
       const { url, ...blogNoUrl } = newBlog
       await api
         .post("/api/blogs")
+        .set({ Authorization: `Bearer ${token}`})
         .send(blogNoUrl)
         .expect(400)
+    })
+
+    test('adding a blog without valid token results in status code 401', async () => {
+      await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(401)
+        .expect('Content-Type', /application\/json/)
     })
   })
 
@@ -105,7 +133,10 @@ describe('when there are some initial blogs saved', () => {
     test('succeeds with status code 204 if id is valid', async () => {
       const blogsBefore = await helper.blogsInDb()
       const blogToDelete = blogsBefore[0]
-      await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
+      await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .set({ Authorization: `Bearer ${token}` })
+        .expect(204)
       const blogsAfter = await helper.blogsInDb()
       assert.strictEqual(blogsAfter.length, blogsBefore.length - 1)
       assert(!blogsAfter.map(blog => blog.title).includes(blogToDelete.title))
@@ -125,6 +156,7 @@ describe('when there are some initial blogs saved', () => {
 
       await api
         .put(`/api/blogs/${blogToUpdate.id}`)
+        .set({ Authorization: `Bearer ${token}` })
         .send(editedBlog)
         .expect(200)
 
