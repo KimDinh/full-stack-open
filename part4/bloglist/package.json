@@ -7,6 +7,7 @@
     "start": "NODE_ENV=production node index.js",
     "dev": "NODE_ENV=development node --watch index.js",
     "test": "NODE_ENV=test node --test",
+    "start:test": "NODE_ENV=test node --watch index.js",
     "lint": "eslint ."
   },
   "author": "Kim Dinh",
