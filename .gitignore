@@ -16,6 +16,7 @@
 ._.DS_Store
 
 node_modules/
+coverage/
 
 .env
 .env.local

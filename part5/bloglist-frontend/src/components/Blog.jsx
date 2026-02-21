@@ -17,7 +17,7 @@ const Blog = ({ blog, handleLikeBlog, handleDelete }) => {
   const deletionAllowed = (currentUser && currentUser.username === blog.user.username)
 
   return (
-    <div style={blogStyle}>
+    <div style={blogStyle} className='blog'>
       <div>
         {blog.title}, {blog.author}
         <button onClick={() => setShowFull(!showFull)}>
@@ -34,11 +34,9 @@ const Blog = ({ blog, handleLikeBlog, handleDelete }) => {
           <div>added by {blog.user.name}</div>
         </div>
       )}
-      { deletionAllowed && (
-        <div>
-          <button onClick={handleDelete}>remove</button>
-        </div>
-      )}
+      { deletionAllowed &&
+        <button onClick={handleDelete}>remove</button>
+      }
     </div>
   )
 }
