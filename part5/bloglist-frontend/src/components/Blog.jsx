@@ -1,7 +1,7 @@
-import { useState } from "react"
-import blogService from "../services/blogs"
+import { useState } from 'react'
+import storage from '../services/storage'
 
-const Blog = ({ blog, handleLikeBlog }) => {
+const Blog = ({ blog, handleLikeBlog, handleDelete }) => {
   const [showFull, setShowFull] = useState(false)
 
   const blogStyle = {
@@ -13,23 +13,31 @@ const Blog = ({ blog, handleLikeBlog }) => {
     marginBottom: 5
   }
 
+  const currentUser = storage.getUser()
+  const deletionAllowed = (currentUser && currentUser.username === blog.user.username)
+
   return (
     <div style={blogStyle}>
       <div>
         {blog.title}, {blog.author}
         <button onClick={() => setShowFull(!showFull)}>
-          {showFull ? "hide" : "view"}
+          {showFull ? 'hide' : 'view'}
         </button>
       </div>
       { showFull && (
         <div>
-            <div><a href={blog.url}>{blog.url}</a></div>
-            <div>
-              likes {blog.likes}
-              <button onClick={handleLikeBlog}>like</button>
-            </div>
-            <div>added by {blog.user.name}</div>
+          <div><a href={blog.url}>{blog.url}</a></div>
+          <div>
+            likes {blog.likes}
+            <button onClick={handleLikeBlog}>like</button>
           </div>
+          <div>added by {blog.user.name}</div>
+        </div>
+      )}
+      { deletionAllowed && (
+        <div>
+          <button onClick={handleDelete}>remove</button>
+        </div>
       )}
     </div>
   )

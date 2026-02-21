@@ -3,6 +3,7 @@ import Blog from './components/Blog'
 import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import storage from './services/storage'
 import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
 import Togglable from './components/Togglable'
@@ -10,8 +11,8 @@ import Togglable from './components/Togglable'
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [notificationMsg, setNotificationMsg] = useState(null)
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const blogFormRef = useRef()
 
@@ -20,15 +21,18 @@ const App = () => {
     return blogs.sort((a, b) => b.likes - a.likes)
   }
 
-  useEffect(async () => {
-    const blogs = await blogService.getAll()
-    setBlogs(sortByLikes(blogs))
+  useEffect(() => {
+    async function fetchBlogs() {
+      const blogs = await blogService.getAll()
+      setBlogs(sortByLikes(blogs))
+    }
+    fetchBlogs()
   }, [])
 
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedUser')
-    if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON)
+    const user = storage.getUser()
+    if (user)
+    {
       setUser(user)
       blogService.setToken(user.token)
     }
@@ -44,19 +48,19 @@ const App = () => {
 
     try {
       const user = await loginService.login({ username, password })
-      window.localStorage.setItem("loggedUser", JSON.stringify(user))
+      storage.saveUser(user)
       blogService.setToken(user.token)
       setUser(user)
-      setUsername("")
-      setPassword("")
+      setUsername('')
+      setPassword('')
     } catch {
-      notify("wrong username or password", "error")
+      notify('wrong username or password', 'error')
     }
   }
 
   const handleLogout = (event) => {
     event.preventDefault()
-    window.localStorage.removeItem("loggedUser")
+    storage.removeUser()
     blogService.setToken(null)
     setUser(null)
   }
@@ -66,9 +70,9 @@ const App = () => {
       blogFormRef.current.toggleVisibility()
       const returnedBlog = await blogService.create(blog)
       setBlogs(blogs.concat(returnedBlog))
-      notify(`A new blog ${returnedBlog.title} by ${returnedBlog.author} added`, "notification")
+      notify(`A new blog ${returnedBlog.title} by ${returnedBlog.author} added`, 'notification')
     } catch (err) {
-      notify(err.response.data.error, "error")
+      notify(err.response.data.error, 'error')
     }
   }
 
@@ -82,7 +86,19 @@ const App = () => {
         )
       )
     } catch (err) {
-      notify(err.response.data.error, "error")
+      notify(err.response.data.error, 'error')
+    }
+  }
+
+  const deleteBlog = async (blog) => {
+    try {
+      if (window.confirm(`Delete ${blog.title} by ${blog.author}`)) {
+        await blogService.remove(blog.id)
+        setBlogs(blogs.filter(b => b.id !== blog.id))
+        notify(`Deleted ${blog.title} by ${blog.author}`, 'notification')
+      }
+    } catch (err) {
+      notify(err.response.data.error, 'error')
     }
   }
 
@@ -114,12 +130,17 @@ const App = () => {
         </p>
       </div>
 
-      <Togglable buttonLabel="new blog" ref={blogFormRef}>
+      <Togglable buttonLabel='new blog' ref={blogFormRef}>
         <BlogForm addBlog={addBlog}/>
       </Togglable>
 
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} handleLikeBlog={() => likeBlog(blog)} />
+        <Blog
+          key={blog.id}
+          blog={blog}
+          handleLikeBlog={() => likeBlog(blog)}
+          handleDelete={() => deleteBlog(blog)}
+        />
       )}
     </div>
   )
